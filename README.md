@@ -1,4 +1,4 @@
-# 🏓 Pickleball Court Markers Helper AR
+# Pickleball Court Markers Helper AR
 
 **用 AR 在地面投影 1:1 真實比例的匹克球場線條，幫助你精準放置場地標記。**  
 **An AR web tool that projects a full-scale pickleball court onto the ground to help you place court markers accurately.**
