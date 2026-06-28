@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pickleball AR</title>
+<title>Pickleball Court Markers Helper AR</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -11,16 +11,30 @@ body {
   background: #0a0a0a; color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 40px 24px; gap: 24px; text-align: center;
+  padding: 40px 24px 60px; gap: 20px;
 }
 
-h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+header {
+  width: 100%; max-width: 340px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 4px;
+}
+h1 {
+  font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
+  display: flex; align-items: center; gap: 8px; flex: 1;
+}
+#lang-btn {
+  background: rgba(255,255,255,0.1); border: 0.5px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.75); padding: 6px 14px; border-radius: 20px;
+  font-size: 13px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+#lang-btn:active { background: rgba(255,255,255,0.2); }
 
 .card {
   background: rgba(255,255,255,0.06);
   border: 0.5px solid rgba(255,255,255,0.12);
   border-radius: 16px; padding: 18px 20px;
-  width: 100%; max-width: 340px; text-align: left;
+  width: 100%; max-width: 340px;
 }
 .card-title {
   font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
@@ -40,14 +54,23 @@ h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
   background: #fff; color: #000; border: none;
   padding: 16px 0; border-radius: 50px; font-size: 18px; font-weight: 600;
   cursor: pointer; text-decoration: none; -webkit-tap-highlight-color: transparent;
+  text-align: center;
 }
 #ar-btn:active { opacity: 0.8; }
+
+.warn {
+  width: 100%; max-width: 340px;
+  background: rgba(255, 200, 0, 0.07);
+  border: 0.5px solid rgba(255, 200, 0, 0.25);
+  border-radius: 12px; padding: 12px 16px;
+  font-size: 13px; color: rgba(255, 220, 80, 0.9); line-height: 1.8;
+}
 
 .how {
   width: 100%; max-width: 340px;
   background: rgba(255,255,255,0.04);
   border: 0.5px solid rgba(255,255,255,0.1);
-  border-radius: 16px; padding: 18px 20px; text-align: left;
+  border-radius: 16px; padding: 18px 20px;
 }
 .how-title {
   font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
@@ -55,73 +78,116 @@ h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
 }
 .step {
   display: flex; gap: 12px; align-items: flex-start;
-  margin-bottom: 12px; font-size: 14px; line-height: 1.5;
+  margin-bottom: 14px; font-size: 14px; line-height: 1.6;
 }
 .step:last-child { margin-bottom: 0; }
 .step-num {
   background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6);
   border-radius: 50%; width: 22px; height: 22px; min-width: 22px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 600; margin-top: 1px;
+  font-size: 11px; font-weight: 600; margin-top: 2px;
 }
 .step-text { color: rgba(255,255,255,0.75); }
 .step-text strong { color: #fff; }
 
-.warn {
-  width: 100%; max-width: 340px;
-  background: rgba(255, 200, 0, 0.07);
-  border: 0.5px solid rgba(255, 200, 0, 0.25);
-  border-radius: 12px; padding: 12px 16px;
-  font-size: 13px; color: rgba(255, 220, 80, 0.9); line-height: 1.7; text-align: left;
-}
-
-.note { font-size: 12px; color: rgba(255,255,255,0.25); }
+.note { font-size: 12px; color: rgba(255,255,255,0.25); text-align: center; }
 </style>
 </head>
 <body>
 
-<h1>🏓 Pickleball AR</h1>
+<header>
+  <h1>
+    <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true" style="flex-shrink:0">
+      <circle cx="16" cy="16" r="15" fill="#E8D44D" stroke="#C4A800" stroke-width="1.2"/>
+      <circle cx="10" cy="10" r="2" fill="#C4A800" opacity="0.7"/>
+      <circle cx="16" cy="8"  r="2" fill="#C4A800" opacity="0.7"/>
+      <circle cx="22" cy="10" r="2" fill="#C4A800" opacity="0.7"/>
+      <circle cx="8"  cy="16" r="2" fill="#C4A800" opacity="0.7"/>
+      <circle cx="14" cy="15" r="2" fill="#C4A800" opacity="0.7"/>
+      <circle cx="20" cy="15" r="2" fill="#C4A800" opacity="0.7"/>
+      <circle cx="26" cy="16" r="2" fill="#C4A800" opacity="0.7"/>
+      <circle cx="10" cy="22" r="2" fill="#C4A800" opacity="0.7"/>
+      <circle cx="16" cy="24" r="2" fill="#C4A800" opacity="0.7"/>
+      <circle cx="22" cy="22" r="2" fill="#C4A800" opacity="0.7"/>
+    </svg>
+    <span id="title-text">Pickleball Court<br>Markers Helper AR</span>
+  </h1>
+  <button id="lang-btn">EN</button>
+</header>
 
 <div class="card">
-  <div class="card-title">球場規格</div>
-  <div class="row"><span class="row-label">整體尺寸</span><span class="row-val">20 × 44 英尺</span></div>
-  <div class="row"><span class="row-label">廚房區（距網）</span><span class="row-val">各 7 英尺</span></div>
-  <div class="row"><span class="row-label">發球區</span><span class="row-val">10 × 15 英尺 × 2</span></div>
-  <div class="row"><span class="row-label">線條寬度</span><span class="row-val">2 英寸</span></div>
+  <div class="card-title" id="spec-title">球場規格</div>
+  <div class="row"><span class="row-label" data-zh="整體尺寸" data-en="Overall size"></span><span class="row-val">20 × 44 ft</span></div>
+  <div class="row"><span class="row-label" data-zh="廚房區（距網）" data-en="Kitchen (from net)"></span><span class="row-val">7 ft each side</span></div>
+  <div class="row"><span class="row-label" data-zh="發球區" data-en="Service courts"></span><span class="row-val">10 × 15 ft × 2</span></div>
+  <div class="row"><span class="row-label" data-zh="線條寬度" data-en="Line width"></span><span class="row-val">2 in</span></div>
 </div>
 
-<a id="ar-btn" href="court.usdz" rel="ar">開啟 AR 球場</a>
-
-<div class="warn">
-  ⚠️ <strong>請勿雙指縮放</strong>，會改變真實比例<br>
-  尺寸跑掉時：<strong>雙擊球場</strong> → 自動重置回 1:1 原始大小
-</div>
+<a id="ar-btn" href="court.usdz" rel="ar" data-zh="開啟 AR 球場" data-en="Open AR Court">開啟 AR 球場</a>
 
 <div class="how">
-  <div class="how-title">操作說明</div>
+  <div class="how-title" id="how-title">使用說明</div>
+
   <div class="step">
     <div class="step-num">1</div>
-    <div class="step-text">點「開啟 AR 球場」，允許相機權限</div>
+    <div class="step-text" data-zh="點擊「<strong>開啟 AR 球場</strong>」，跳出相機畫面後，請<strong>對著地面緩慢移動</strong> iPhone" data-en="Tap <strong>Open AR Court</strong>. Once the camera opens, <strong>slowly move your iPhone</strong> while pointing at the <strong>ground</strong>"></div>
   </div>
   <div class="step">
     <div class="step-num">2</div>
-    <div class="step-text">慢慢對著<strong>地面</strong>移動 iPhone，等球場自動出現</div>
+    <div class="step-text" data-zh="確認球場線條浮現，系統偵測完成後，球場線條會自動以 <strong>1:1 真實比例</strong>出現在地面上" data-en="Wait for the court to appear. Once detected, the court lines display at <strong>1:1 real-world scale</strong> on the ground"></div>
   </div>
   <div class="step">
     <div class="step-num">3</div>
-    <div class="step-text"><strong>單指拖曳</strong> → 移動球場位置</div>
+    <div class="step-text" data-zh="<strong>單指拖曳</strong>球場，將球場移動到您想要的位置" data-en="<strong>Drag with one finger</strong> to move the court to your desired position"></div>
   </div>
   <div class="step">
     <div class="step-num">4</div>
-    <div class="step-text"><strong>雙指旋轉</strong>（順時針/逆時針）→ 轉動方向</div>
+    <div class="step-text" data-zh="<strong>雙指旋轉</strong>球場，調整球場角度以對齊現場方向" data-en="<strong>Two-finger rotate</strong> to adjust the court angle and align it with your space"></div>
   </div>
   <div class="step">
     <div class="step-num">5</div>
-    <div class="step-text"><strong>雙擊球場</strong> → 重置大小與位置</div>
+    <div class="step-text" data-zh="<strong>雙指縮放</strong>會改變真實比例。若尺寸跑掉，<strong>雙擊（按兩下）</strong>球場即可重置回 1:1 原始大小" data-en="<strong>Pinch to scale</strong> will alter real-world size. If this happens, <strong>double-tap</strong> the court to reset to 1:1 scale"></div>
+  </div>
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-text" data-zh="當球場調整至理想位置後，即可順著螢幕上的<strong>虛擬線條</strong>在地面<strong>放置標記</strong>" data-en="Once the court is in position, place <strong>markers on the ground</strong> following the <strong>virtual lines</strong> on screen"></div>
   </div>
 </div>
 
-<p class="note">僅支援 iPhone / iPad · iOS 12 以上 · Safari</p>
+<p class="note" id="footer-note">僅支援 iPhone / iPad · iOS 12 以上 · Safari</p>
 
+<script>
+let lang = 'zh';
+
+function applyLang() {
+  const isZh = lang === 'zh';
+  document.getElementById('lang-btn').textContent = isZh ? 'EN' : '中';
+  document.getElementById('spec-title').textContent = isZh ? '球場規格' : 'Court Specs';
+  document.getElementById('how-title').textContent = isZh ? '使用說明' : 'How to Use';
+  document.getElementById('footer-note').textContent = isZh
+    ? '僅支援 iPhone / iPad · iOS 12 以上 · Safari'
+    : 'iPhone / iPad · iOS 12+ · Safari only';
+
+  const arBtn = document.getElementById('ar-btn');
+  arBtn.textContent = isZh ? '開啟 AR 球場' : 'Open AR Court';
+
+  document.querySelectorAll('[data-zh]').forEach(el => {
+    const val = isZh ? el.dataset.zh : el.dataset.en;
+    if (val !== undefined) el.innerHTML = val;
+  });
+
+  document.querySelectorAll('.step-text').forEach(el => {
+    const val = isZh ? el.dataset.zh : el.dataset.en;
+    if (val !== undefined) el.innerHTML = val;
+  });
+}
+
+document.getElementById('lang-btn').addEventListener('click', () => {
+  lang = lang === 'zh' ? 'en' : 'zh';
+  applyLang();
+});
+
+applyLang();
+</script>
 </body>
 </html>
