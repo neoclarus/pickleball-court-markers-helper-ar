@@ -2,69 +2,316 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pickleball AR 球場</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pickleball AR</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  min-height: 100vh;
-  background: #0a0a0a;
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 32px 24px; text-align: center; gap: 24px;
-}
-h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
-p { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.7; max-width: 300px; }
-ul {
-  list-style: none; font-size: 14px; color: rgba(255,255,255,0.5);
-  line-height: 2.2; text-align: left;
-}
-ul li::before { content: "· "; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 
-#ar-link {
-  display: inline-block;
-  background: #fff; color: #000;
-  padding: 16px 48px; border-radius: 50px;
-  font-size: 18px; font-weight: 600;
-  text-decoration: none; margin-top: 8px;
+#start-screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 20px; background: #0a0a0a; color: #fff;
+  font-family: -apple-system, sans-serif; padding: 32px; text-align: center; z-index: 10;
 }
-#ar-link:active { opacity: 0.8; }
-
-.note {
-  font-size: 13px; color: rgba(255,255,255,0.35);
-  max-width: 280px; line-height: 1.6;
+#start-screen h1 { font-size: 26px; font-weight: 700; }
+#start-screen p  { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.7; max-width: 280px; }
+#start-btn {
+  background: #fff; color: #000; border: none;
+  padding: 15px 48px; border-radius: 50px; font-size: 17px; font-weight: 600; cursor: pointer;
 }
 
-.divider {
-  width: 40px; height: 1px;
-  background: rgba(255,255,255,0.1);
+#overlay {
+  position: fixed; inset: 0; pointer-events: none;
+  font-family: -apple-system, sans-serif; z-index: 5; display: none;
 }
+
+#hint-box {
+  position: absolute; bottom: 140px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+  color: rgba(255,255,255,0.85); font-size: 14px; line-height: 1.7;
+  padding: 10px 20px; border-radius: 12px; text-align: center;
+  white-space: nowrap;
+}
+
+#controls {
+  position: absolute; bottom: 36px; left: 0; right: 0;
+  display: flex; justify-content: center; gap: 12px;
+  pointer-events: all;
+}
+.ctrl-btn {
+  background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255,255,255,0.3); color: #fff;
+  padding: 12px 22px; border-radius: 50px; font-size: 14px; font-weight: 500;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.ctrl-btn:active { background: rgba(255,255,255,0.25); }
+
+#rotate-hint {
+  position: absolute; top: 24px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(8px);
+  color: rgba(255,255,255,0.6); font-size: 12px;
+  padding: 6px 14px; border-radius: 20px; white-space: nowrap; display: none;
+}
+
+#err {
+  position: fixed; inset: 0; background: #0a0a0a; color: #fff;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; text-align: center; padding: 32px; font-family: -apple-system, sans-serif; z-index: 20;
+}
+#err h2 { font-size: 20px; }
+#err p  { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.7; max-width: 300px; }
 </style>
 </head>
 <body>
 
-<h1>🏓 Pickleball AR</h1>
+<div id="start-screen">
+  <h1>🏓 Pickleball AR</h1>
+  <p>在地面顯示 1:1 真實比例球場<br>尺寸固定，不會因捏合而改變</p>
+  <button id="start-btn">開始 AR</button>
+  <p style="font-size:12px; color:rgba(255,255,255,0.3)">需要 iPhone Safari · iOS 16+</p>
+</div>
 
-<p>用 iPhone Safari 在地面投影 1:1 真實比例的匹克球場線條</p>
+<div id="err">
+  <h2>無法啟動 AR</h2>
+  <p id="err-msg">請確認使用 iPhone Safari，且 iOS 已更新至 16 以上。</p>
+</div>
 
-<ul>
-  <li>標準場地 20 × 44 英尺（6.1 × 13.4 公尺）</li>
-  <li>含廚房線、中線、發球區、球網位置</li>
-  <li>放置後可自由移動、旋轉、縮放</li>
-</ul>
+<div id="overlay">
+  <div id="rotate-hint">雙指旋轉球場</div>
+  <div id="hint-box">對準地面，等白圈出現後點擊放置球場</div>
+  <div id="controls">
+    <button class="ctrl-btn" id="btn-rescan">↺ 重新偵測地面</button>
+    <button class="ctrl-btn" id="btn-rotate-cw">旋轉 45°</button>
+  </div>
+</div>
 
-<a id="ar-link" href="court.usdz" rel="ar">
-  開啟 AR 球場
-</a>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-<div class="divider"></div>
+const FT = 0.3048;
+const CW = 20 * FT;   // 6.096m
+const CL = 44 * FT;   // 13.411m
+const KD = 7  * FT;   // 2.134m  kitchen depth from net
+const LW = 0.051;     // 2 inch line width
+const LH = 0.006;
 
-<p class="note">
-  點擊後會自動開啟 Apple AR Quick Look<br>
-  對準地面，點擊放置球場<br><br>
-  僅支援 iPhone（iOS 12 以上）/ iPad
-</p>
+let renderer, scene, camera;
+let xrSession, hitTestSource;
+let reticle, court;
+let courtPlaced = false;
+let courtRotY = 0;
+let touchStartAngle = null;
+let courtStartRotY = null;
 
+// ── Build court ──────────────────────────────────────────────────
+function makeMat(hex, opacity = 1) {
+  return new THREE.MeshBasicMaterial({
+    color: hex, side: THREE.DoubleSide,
+    transparent: opacity < 1, opacity
+  });
+}
+
+function buildCourt() {
+  const g = new THREE.Group();
+  const white  = makeMat(0xffffff);
+  const yellow = makeMat(0xffee44);
+  const fill   = makeMat(0x3366cc, 0.18);
+
+  const hw = CW / 2, hl = CL / 2, kz = KD;
+
+  function line(x1, z1, x2, z2, mat, w = LW) {
+    const dx = x2 - x1, dz = z2 - z1;
+    const len = Math.sqrt(dx*dx + dz*dz);
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, len),
+      mat
+    );
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.rotation.z = Math.atan2(dx, dz);
+    mesh.position.set((x1+x2)/2, LH, (z1+z2)/2);
+    g.add(mesh);
+  }
+
+  // Court fill
+  const fillMesh = new THREE.Mesh(new THREE.PlaneGeometry(CW, CL), fill);
+  fillMesh.rotation.x = -Math.PI / 2;
+  fillMesh.position.y = 0.001;
+  g.add(fillMesh);
+
+  // Baselines
+  line(-hw, -hl,  hw, -hl, white);
+  line(-hw,  hl,  hw,  hl, white);
+  // Sidelines
+  line(-hw, -hl, -hw,  hl, white);
+  line( hw, -hl,  hw,  hl, white);
+  // Kitchen lines (7ft from net)
+  line(-hw, -kz,  hw, -kz, white);
+  line(-hw,  kz,  hw,  kz, white);
+  // Centre lines (service courts only)
+  line(0, -hl, 0, -kz, white);
+  line(0,  kz, 0,  hl, white);
+  // Net
+  line(-hw, 0, hw, 0, yellow, LW * 0.5);
+
+  return g;
+}
+
+function buildReticle() {
+  const geo = new THREE.RingGeometry(0.10, 0.14, 32);
+  geo.rotateX(-Math.PI / 2);
+  const m = new THREE.Mesh(geo, makeMat(0xffffff));
+  m.matrixAutoUpdate = false;
+  m.visible = false;
+  return m;
+}
+
+// ── AR startup ───────────────────────────────────────────────────
+async function startAR() {
+  if (!navigator.xr) { showErr('您的瀏覽器不支援 WebXR，請使用 iPhone Safari。'); return; }
+
+  const ok = await navigator.xr.isSessionSupported('immersive-ar').catch(() => false);
+  if (!ok) { showErr('WebXR AR 不可用。請更新 iOS 並使用 Safari 開啟。'); return; }
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.xr.enabled = true;
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 200);
+  scene.add(new THREE.AmbientLight(0xffffff, 1));
+
+  reticle = buildReticle();
+  scene.add(reticle);
+
+  try {
+    xrSession = await navigator.xr.requestSession('immersive-ar', {
+      requiredFeatures: ['hit-test', 'local'],
+      optionalFeatures: ['dom-overlay'],
+      domOverlay: { root: document.getElementById('overlay') }
+    });
+  } catch(e) {
+    showErr('AR 啟動失敗：' + e.message); return;
+  }
+
+  renderer.xr.setReferenceSpaceType('local');
+  await renderer.xr.setSession(xrSession);
+
+  const viewerSpace = await xrSession.requestReferenceSpace('viewer');
+  hitTestSource = await xrSession.requestHitTestSource({ space: viewerSpace });
+
+  xrSession.addEventListener('end', cleanup);
+  xrSession.addEventListener('select', onSelect);
+
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('overlay').style.display = 'block';
+  setHint('對準地面，等白圈出現後點擊放置球場');
+
+  renderer.setAnimationLoop(onFrame);
+}
+
+// ── Place / Move court ───────────────────────────────────────────
+function onSelect() {
+  if (!reticle.visible) return;
+
+  if (!court) {
+    court = buildCourt();
+    scene.add(court);
+  }
+
+  const pos = new THREE.Vector3();
+  pos.setFromMatrixPosition(reticle.matrix);
+  court.position.copy(pos);
+  court.rotation.y = courtRotY;
+  courtPlaced = true;
+
+  setHint('點擊地面移動球場');
+  document.getElementById('rotate-hint').style.display = 'block';
+}
+
+// ── Frame loop ───────────────────────────────────────────────────
+function onFrame(_, frame) {
+  if (!frame) return;
+  const refSpace = renderer.xr.getReferenceSpace();
+  const hits = frame.getHitTestResults(hitTestSource);
+
+  if (hits.length > 0) {
+    const pose = hits[0].getPose(refSpace);
+    reticle.visible = true;
+    reticle.matrix.fromArray(pose.transform.matrix);
+  } else {
+    reticle.visible = false;
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ── Rescan ground ────────────────────────────────────────────────
+function rescan() {
+  courtPlaced = false;
+  if (court) { scene.remove(court); court = null; }
+  courtRotY = 0;
+  reticle.visible = false;
+  document.getElementById('rotate-hint').style.display = 'none';
+  setHint('對準地面，等白圈出現後點擊放置球場');
+}
+
+// ── Touch rotation (two-finger) ──────────────────────────────────
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2 && courtPlaced) {
+    const dx = e.touches[1].clientX - e.touches[0].clientX;
+    const dy = e.touches[1].clientY - e.touches[0].clientY;
+    touchStartAngle = Math.atan2(dy, dx);
+    courtStartRotY = court ? court.rotation.y : courtRotY;
+    e.preventDefault();
+  }
+}, { passive: false });
+
+document.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2 && touchStartAngle !== null && court) {
+    const dx = e.touches[1].clientX - e.touches[0].clientX;
+    const dy = e.touches[1].clientY - e.touches[0].clientY;
+    const angle = Math.atan2(dy, dx);
+    court.rotation.y = courtStartRotY + (angle - touchStartAngle);
+    courtRotY = court.rotation.y;
+    e.preventDefault();
+  }
+}, { passive: false });
+
+document.addEventListener('touchend', (e) => {
+  if (e.touches.length < 2) touchStartAngle = null;
+});
+
+// ── Button: rotate 45° ───────────────────────────────────────────
+document.getElementById('btn-rotate-cw').addEventListener('click', () => {
+  courtRotY += Math.PI / 4;
+  if (court) court.rotation.y = courtRotY;
+});
+
+document.getElementById('btn-rescan').addEventListener('click', rescan);
+document.getElementById('start-btn').addEventListener('click', startAR);
+
+// ── Helpers ───────────────────────────────────────────────────────
+function setHint(txt) {
+  document.getElementById('hint-box').textContent = txt;
+}
+
+function showErr(msg) {
+  document.getElementById('err-msg').textContent = msg;
+  document.getElementById('err').style.display = 'flex';
+  document.getElementById('start-screen').style.display = 'none';
+}
+
+function cleanup() {
+  hitTestSource?.cancel();
+  renderer?.setAnimationLoop(null);
+  renderer?.domElement?.remove();
+  document.getElementById('start-screen').style.display = 'flex';
+  document.getElementById('overlay').style.display = 'none';
+  court = null; reticle = null; courtPlaced = false;
+}
+</script>
 </body>
 </html>
